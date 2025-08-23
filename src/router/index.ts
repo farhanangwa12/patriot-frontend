@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import DashboardView from '../views/DashboardView.vue'
+import QuizManagementView from '../views/QuizManagementView.vue'
 import IntroView from '../views/IntroView.vue'
 import QuizView from '../views/QuizView.vue'
 import ResultView from '../views/ResultView.vue'
@@ -11,6 +14,24 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
+    },
+    
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardView,
+      meta: { requiresAuth: true }
+    },
+
+    {
+      path: '/quiz-management',
+      name: 'quiz-management',
+      component: QuizManagementView
     },
     {
       path: '/intro',

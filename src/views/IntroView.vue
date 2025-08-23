@@ -13,12 +13,12 @@
         <div v-if="loading" class="loading-state">
           <p>Memuat data kuis...</p>
         </div>
-        
+
         <div v-else-if="error" class="error-state">
           <p>{{ error }}</p>
           <button class="btn-ghost" @click="fetchQuizData">Coba Lagi</button>
         </div>
-        
+
         <div v-else>
           <p>
             {{ quizData.description || 'Kuis ini terdiri dari beberapa pertanyaan pilihan ganda. Silakan baca setiap pertanyaan dengan cermat dan pilih jawaban yang paling tepat.' }}
@@ -78,20 +78,37 @@ const fetchQuizData = async () => {
   error.value = null
 
   try {
-    const response = await axios.get<ApiResponse>('http://localhost:3000/quiz/intro')
+    // Ambil dari localStorage
+    const storedQuiz = localStorage.getItem("selected_quiz")
+    const quiz = storedQuiz ? JSON.parse(storedQuiz) : null
 
-    if (response.data.status === 'success') {
+    if (!quiz || !quiz.id) {
+      throw new Error("Quiz tidak ditemukan di localStorage")
+    }
+
+    const id = quiz.id // contoh: 6
+
+    // Kalau pakai TS -> gunakan generic
+    // const response = await axios.get<ApiResponse>(`http://localhost:3000/quiz/intro/${id}`)
+    // Kalau pakai JS biasa -> hapus generic
+    const response = await axios.get(`http://localhost:3000/quiz/intro/${id}`)
+
+    console.log("Response quiz intro:", response)
+
+    if (response.data.status === "success") {
       quizData.value = response.data.data
     } else {
-      error.value = 'Gagal memuat data kuis'
+      error.value = "Gagal memuat data kuis"
     }
   } catch (err) {
-    console.error('Error fetching quiz data:', err)
-    error.value = 'Tidak dapat menghubungi server. Pastikan server berjalan di localhost:3000'
+    console.error("Error fetching quiz data:", err)
+    error.value =
+      "Tidak dapat menghubungi server. Pastikan server berjalan di localhost:3000"
   } finally {
     loading.value = false
   }
 }
+
 
 const startQuiz = () => {
   // jika router tersedia, pindah ke halaman /quiz

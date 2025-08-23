@@ -43,17 +43,40 @@
         <section class="breakdown" aria-label="Rincian jawaban">
           <h2 class="breakdown-title">Rincian Jawaban</h2>
           <div class="summary-stats">
-            <div class="stat-item correct">
-              <div class="stat-number">{{ quizResult.summary.correct_answers }}</div>
-              <div class="stat-label">Benar</div>
+            <div class="stat-item correct-stat">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ quizResult.summary.correct_answers }}</div>
+                <div class="stat-label">Benar</div>
+              </div>
             </div>
-            <div class="stat-item incorrect">
-              <div class="stat-number">{{ quizResult.summary.incorrect_answers }}</div>
-              <div class="stat-label">Salah</div>
+            
+            <div class="stat-item incorrect-stat">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ quizResult.summary.incorrect_answers }}</div>
+                <div class="stat-label">Salah</div>
+              </div>
             </div>
-            <div class="stat-item percentage">
-              <div class="stat-number">{{ quizResult.summary.accuracy_percentage }}%</div>
-              <div class="stat-label">Akurasi</div>
+            
+            <div class="stat-item accuracy-stat">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                  <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ quizResult.summary.accuracy_percentage }}%</div>
+                <div class="stat-label">Akurasi</div>
+              </div>
             </div>
           </div>
 
@@ -150,8 +173,28 @@ const fetchQuizResult = async () => {
     loading.value = true
     error.value = null
 
-    const quizId = route.params.id
-    const response = await fetch(`http://localhost:3000/quiz/result/1`)
+    // Ambil dari localStorage terlebih dahulu
+    const stored = localStorage.getItem('result_quiz')
+    let id = route.params.id ?? null
+
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        // object contoh: { id:184, user_id:1, quiz_id:6, ... }
+        // gunakan parsed.id jika ada (id result), kalau mau pakai quiz_id ganti ke parsed.quiz_id
+        if (parsed && (parsed.id || parsed.quiz_id)) {
+          id = parsed.id ?? parsed.quiz_id ?? id
+        }
+      } catch (parseErr) {
+        console.warn('Failed to parse result_quiz from localStorage', parseErr)
+      }
+    }
+
+    if (!id) {
+      throw new Error('ID tidak ditemukan di localStorage atau route params')
+    }
+
+    const response = await fetch(`http://localhost:3000/quiz/result/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -321,11 +364,88 @@ onMounted(() => {
 }
 
 .breakdown-title {
-  margin: 10px 0;
+  margin: 10px 0 18px;
   font-size: 15px;
   color: #0b2540;
 }
 
+/* Summary Stats - Improved */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(250, 250, 255, 0.85));
+  border: 1px solid rgba(6, 34, 68, 0.08);
+  box-shadow: 0 6px 20px rgba(3, 10, 25, 0.06);
+  transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(3, 10, 25, 0.1);
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.correct-stat .stat-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.incorrect-stat .stat-icon {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.accuracy-stat .stat-icon {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.stat-icon .icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0b2540;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* List styles */
 .list {
   list-style: none;
   padding: 0;
@@ -399,7 +519,7 @@ onMounted(() => {
   background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
 
-.icon {
+.result-badge .icon {
   width: 20px;
   height: 20px;
   stroke: currentColor;
@@ -407,16 +527,16 @@ onMounted(() => {
   fill: none;
 }
 
-.correct {
+.score-info {
   text-align: right;
 }
 
-.correct .label {
+.score-info .label {
   font-size: 12px;
   color: #475569;
 }
 
-.correct .value {
+.score-info .value {
   font-weight: 700;
   color: #0b2540;
   margin-top: 4px;
@@ -443,6 +563,7 @@ onMounted(() => {
   font-weight: 700;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-outline {
@@ -451,10 +572,19 @@ onMounted(() => {
   color: #0b2540;
 }
 
+.btn-outline:hover {
+  background: rgba(6, 34, 68, 0.04);
+}
+
 .btn-primary {
   background: linear-gradient(90deg, #06b6d4, #3b82f6);
   color: white;
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(59, 130, 246, 0.16);
 }
 
 /* small */
@@ -465,6 +595,13 @@ onMounted(() => {
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+  .summary-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
 @media (max-width: 640px) {
   .card {
     padding: 16px;
@@ -489,6 +626,10 @@ onMounted(() => {
 
   .actions {
     justify-content: space-between;
+  }
+
+  .stat-number {
+    font-size: 20px;
   }
 }
 </style>

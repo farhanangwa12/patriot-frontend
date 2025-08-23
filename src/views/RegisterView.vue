@@ -1,12 +1,25 @@
 <template>
   <div class="page-wrap">
-    <div class="card" role="dialog" aria-labelledby="login-title" aria-modal="true">
+    <div class="card" role="dialog" aria-labelledby="register-title" aria-modal="true">
       <header class="card-head">
-        <h1 id="login-title">Masuk</h1>
-        <p class="lead">Akses kuis dengan akun Anda.</p>
+        <h1 id="register-title">Daftar</h1>
+        <p class="lead">Buat akun baru untuk mengakses kuis.</p>
       </header>
 
-      <form class="form" @submit.prevent="handleLogin" novalidate>
+      <form class="form" @submit.prevent="handleRegister" novalidate>
+        <div class="field">
+          <label for="name">Nama Lengkap</label>
+          <input
+            id="name"
+            type="text"
+            v-model="name"
+            autocomplete="name"
+            :disabled="loading"
+            :aria-invalid="!!error && !name"
+            placeholder="Masukkan nama lengkap"
+          />
+        </div>
+
         <div class="field">
           <label for="email">Email</label>
           <input
@@ -27,7 +40,7 @@
               id="password"
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
-              autocomplete="current-password"
+              autocomplete="new-password"
               :disabled="loading"
               :aria-invalid="!!error && !password"
               placeholder="Masukkan password"
@@ -46,26 +59,49 @@
           </div>
         </div>
 
+        <div class="field">
+          <label for="confirmPassword">Konfirmasi Password</label>
+          <div class="password-wrap">
+            <input
+              id="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              v-model="confirmPassword"
+              autocomplete="new-password"
+              :disabled="loading"
+              :aria-invalid="!!error && !confirmPassword"
+              placeholder="Konfirmasi password"
+            />
+            <button
+              type="button"
+              class="pw-toggle"
+              @click="toggleConfirmPassword"
+              :aria-pressed="showConfirmPassword"
+              :disabled="loading"
+              :title="showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+            >
+              <span v-if="showConfirmPassword">👁️</span>
+              <span v-else>🙈</span>
+            </button>
+          </div>
+        </div>
+
         <div class="row">
-          <label class="checkbox">
-            <input type="checkbox" v-model="remember" :disabled="loading" />
-            <span>Remember me</span>
-          </label>
-          <button type="button" class="link" @click="fillDemo" :disabled="loading">Demo creds</button>
+          <button type="button" class="link" @click="fillDemo" :disabled="loading">Demo data</button>
         </div>
 
         <p v-if="error" class="error" role="alert" aria-live="assertive">{{ error }}</p>
+        <p v-if="success" class="success" role="alert" aria-live="assertive">{{ success }}</p>
 
         <button class="btn" type="submit" :disabled="loading">
-          <span v-if="!loading">Login</span>
+          <span v-if="!loading">Daftar</span>
           <span v-else>Loading…</span>
         </button>
       </form>
 
       <footer class="card-foot">
         <small class="muted">
-          Belum punya akun? 
-          <router-link to="/register" class="link">Daftar di sini</router-link>
+          Sudah punya akun? 
+          <router-link to="/" class="link">Masuk di sini</router-link>
         </small>
       </footer>
     </div>
@@ -73,50 +109,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const name = ref<string>('')
 const email = ref<string>('')
 const password = ref<string>('')
+const confirmPassword = ref<string>('')
 const showPassword = ref<boolean>(false)
-const remember = ref<boolean>(false)
+const showConfirmPassword = ref<boolean>(false)
 const error = ref<string>('')
+const success = ref<string>('')
 const loading = ref<boolean>(false)
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-// Isi demo credentials cepat
-const fillDemo = () => {
-  email.value = 'mantap@mantap.com'
-  password.value = '123'
-  error.value = ''
+const toggleConfirmPassword = () => {
+  showConfirmPassword.value = !showConfirmPassword.value
 }
 
-onMounted(() => {
-  try {
-    const saved = localStorage.getItem('quiz_demo_email')
-    if (saved) {
-      email.value = saved
-      remember.value = true
-    }
-  } catch (e) {
-    // ignore localStorage errors (private mode)
-  }
-})
-
-const handleLogin = async () => {
+// Isi demo data cepat
+const fillDemo = () => {
+  name.value = 'Rudolf Supratman'
+  email.value = 'mantap@mantap.com'
+  password.value = '123'
+  confirmPassword.value = '123'
   error.value = ''
+  success.value = ''
+}
 
-  // simple validation
-  if (!email.value.trim() || !password.value) {
-    error.value = 'Silakan isi email dan password'
+const handleRegister = async () => {
+  error.value = ''
+  success.value = ''
+
+  // Validation
+  if (!name.value.trim() || !email.value.trim() || !password.value || !confirmPassword.value) {
+    error.value = 'Silakan isi semua field'
     return
   }
 
-  // email validation
+  if (name.value.trim().length < 2) {
+    error.value = 'Nama minimal 2 karakter'
+    return
+  }
+
+  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email.value.trim())) {
     error.value = 'Format email tidak valid'
@@ -128,15 +168,21 @@ const handleLogin = async () => {
     return
   }
 
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Password dan konfirmasi password tidak sama'
+    return
+  }
+
   loading.value = true
 
   try {
-    const response = await fetch('http://localhost:3000/auth/login', {
+    const response = await fetch('http://localhost:3000/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        name: name.value.trim(),
         email: email.value.trim(),
         password: password.value
       })
@@ -145,29 +191,18 @@ const handleLogin = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Login gagal')
+      throw new Error(data.message || 'Registrasi gagal')
     }
 
-    // Store token if provided
-    if (data.token) {
-      localStorage.setItem('quiz_token', data.token)
-    }
+    success.value = 'Registrasi berhasil! Mengalihkan ke halaman login...'
+    
+    // Redirect to login after 2 seconds
+    setTimeout(() => {
+      router.push('/').catch(() => {})
+    }, 2000)
 
-    // "Remember me" handling
-    try {
-      if (remember.value) {
-        localStorage.setItem('quiz_demo_email', email.value.trim())
-      } else {
-        localStorage.removeItem('quiz_demo_email')
-      }
-    } catch (e) {
-      // ignore storage errors
-    }
-
-    // success -> navigate to dashboard
-    router.push('/dashboard').catch(() => {})
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Terjadi kesalahan saat login. Coba lagi.'
+    error.value = e instanceof Error ? e.message : 'Terjadi kesalahan saat registrasi. Coba lagi.'
   } finally {
     loading.value = false
   }
@@ -251,14 +286,14 @@ input:focus {
 .pw-toggle:disabled { opacity: 0.6; cursor: not-allowed; }
 .pw-toggle:focus { outline: 3px solid rgba(59,130,246,0.12); outline-offset: 2px; }
 
-/* row for remember + demo */
+/* row for demo button */
 .row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 12px;
 }
-.checkbox { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #334155; }
+
 .link {
   background: transparent;
   border: none;
@@ -271,8 +306,9 @@ input:focus {
 .link:disabled { opacity: 0.6; cursor: not-allowed; }
 .link:hover { text-decoration: underline; }
 
-/* Error and button */
+/* Error, success and button */
 .error { color: #dc2626; font-size: 13px; margin: 4px 0; }
+.success { color: #16a34a; font-size: 13px; margin: 4px 0; }
 .btn {
   width: 100%;
   padding: 12px;
