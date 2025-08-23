@@ -89,9 +89,8 @@ const fetchQuizData = async () => {
     const id = quiz.id // contoh: 6
 
     // Kalau pakai TS -> gunakan generic
-    // const response = await axios.get<ApiResponse>(`http://localhost:3000/quiz/intro/${id}`)
     // Kalau pakai JS biasa -> hapus generic
-    const response = await axios.get(`http://localhost:3000/quiz/intro/${id}`)
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/quiz/intro/${id}`)
 
     console.log("Response quiz intro:", response)
 

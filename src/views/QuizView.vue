@@ -141,7 +141,7 @@ const loadQuiz = async () => {
     const id = quiz.id // contoh: 6
 
     // 🔹 Request POST pakai Axios
-    const response = await axios.post("http://localhost:3000/quiz/start", { id })
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL_BACKEND}/quiz/start`, { id })
 
     const data = response.data
 
@@ -183,7 +183,7 @@ const submitAnswers = async () => {
       }))
     }
 
-    const response = await axios.post("http://localhost:3000/quiz/submit", submissionData)
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL_BACKEND}/quiz/submit`, submissionData)
     const resp = response.data
 
     // cek respons sukses (dua kemungkinan struktur)

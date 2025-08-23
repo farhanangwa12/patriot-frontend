@@ -163,7 +163,7 @@ import axios from 'axios'
 const router = useRouter()
 
 // API Base URL
-const API_BASE_URL = 'http://localhost:3000/quiz'
+const API_BASE_URL = `${import.meta.env.VITE_BASE_URL_BACKEND}/quiz`
 
 interface Quiz {
     id: number
