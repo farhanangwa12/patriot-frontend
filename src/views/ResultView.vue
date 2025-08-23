@@ -194,7 +194,7 @@ const fetchQuizResult = async () => {
       throw new Error('ID tidak ditemukan di localStorage atau route params')
     }
 
-    const response = await fetch(`http://localhost:3000/quiz/result/${id}`)
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL_BACKEND}/quiz/result/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
