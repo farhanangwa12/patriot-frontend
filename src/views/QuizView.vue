@@ -3,12 +3,26 @@
     <div class="decor decor-1" aria-hidden="true"></div>
     <div class="decor decor-2" aria-hidden="true"></div>
 
-    <main class="card" role="main" aria-labelledby="quiz-title">
+    <!-- Loading State -->
+    <div v-if="loading" class="card loading-state">
+      <div class="loading-spinner"></div>
+      <p>Memuat kuis...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="card error-state">
+      <h2>❌ Gagal memuat kuis</h2>
+      <p>{{ error }}</p>
+      <button @click="loadQuiz" class="btn btn-primary">Coba Lagi</button>
+    </div>
+
+    <!-- Quiz Content -->
+    <main v-else class="card" role="main" aria-labelledby="quiz-title">
       <!-- Header -->
       <header class="card-header">
         <div class="title-wrap">
-          <h1 id="quiz-title">Kuis Singkat</h1>
-          <p class="subtitle">Jawablah sejujur mungkin — ada batas waktu tiap soal.</p>
+          <h1 id="quiz-title">{{ quizData.title }}</h1>
+          <p class="subtitle">{{ quizData.description }}</p>
         </div>
 
         <div class="timer" role="status" aria-live="polite">
@@ -33,8 +47,7 @@
 
       <!-- Question -->
       <section class="question">
-        <h2 class="question-text">{{ questions[currentQuestion].text }}</h2>
-        <p class="question-desc">{{ questions[currentQuestion].description }}</p>
+        <h2 class="question-text">{{ questions[currentQuestion].question_text }}</h2>
 
         <label class="answer-label" for="answer">Jawaban</label>
         <textarea
@@ -47,7 +60,7 @@
           aria-describedby="err"
         ></textarea>
 
-        <p v-if="error" id="err" class="error-msg" role="alert">{{ error }}</p>
+        <p v-if="validationError" id="err" class="error-msg" role="alert">{{ validationError }}</p>
       </section>
 
       <!-- Navigation -->
@@ -63,8 +76,12 @@
 
         <div class="mid-controls">
           <button class="btn btn-ghost" @click="clearAnswer" title="Hapus jawaban saat ini">Clear</button>
-          <button class="btn btn-primary" @click="nextQuestion">
-            {{ currentQuestion < questions.length - 1 ? 'Berikutnya →' : 'Selesai' }}
+          <button 
+            class="btn btn-primary" 
+            @click="nextQuestion"
+            :disabled="submitting"
+          >
+            {{ submitting ? 'Mengirim...' : (currentQuestion < questions.length - 1 ? 'Berikutnya →' : 'Selesai') }}
           </button>
         </div>
       </nav>
@@ -77,99 +94,186 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 interface Question {
-  text: string
+  id: number
+  quiz_id: number
+  question_text: string
+  fact_answer: string
+  question_type: string
+  created_by_ai: boolean
+  created_at: string
+}
+
+interface QuizData {
+  id: number
+  title: string
   description: string
-  correct: string
+  question_statuses: Array<{ status: string }>
+  total_questions: number
+  created_at: string
+  updated_at: string
+}
+
+interface ApiResponse {
+  status: string
+  message: string
+  data: {
+    quiz: QuizData
+    questions: Question[]
+  }
 }
 
 const router = useRouter()
 
-const questions = [
-  {
-    text: 'Apa ibu kota Indonesia?',
-    description: 'Ibu kota adalah pusat pemerintahan suatu negara. Tulis nama kota dengan huruf kapital di awal.',
-    correct: 'Jakarta'
-  },
-  {
-    text: 'Berapa hasil dari 2 + 2?',
-    description: 'Tulis jawaban dalam bentuk angka.',
-    correct: '4'
-  }
-] as Question[]
-
-const currentQuestion = ref<number>(0)
-const answers = ref<string[]>(Array(questions.length).fill(''))
+// State variables
+const loading = ref<boolean>(true)
 const error = ref<string>('')
-const timeLeft = ref<number>(30) // detik per soal
+const quizData = ref<QuizData | null>(null)
+const questions = ref<Question[]>([])
+const currentQuestion = ref<number>(0)
+const answers = ref<string[]>([])
+const validationError = ref<string>('')
+const timeLeft = ref<number>(30)
+const submitting = ref<boolean>(false)
 let timer: number | null = null
 
-const progress = computed(() => ((currentQuestion.value + 1) / questions.length) * 100)
+const progress = computed(() => ((currentQuestion.value + 1) / questions.value.length) * 100)
 
-// update answer dari textarea
+// Load quiz data from API
+const loadQuiz = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    const response = await fetch('http://localhost:3000/quiz/start')
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data: ApiResponse = await response.json()
+    
+    if (data.status !== 'success') {
+      throw new Error(data.message || 'Gagal memuat data kuis')
+    }
+    
+    quizData.value = data.data.quiz
+    questions.value = data.data.questions
+    answers.value = Array(data.data.questions.length).fill('')
+    
+    loading.value = false
+  } catch (err) {
+    console.error('Error loading quiz:', err)
+    error.value = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat kuis'
+    loading.value = false
+  }
+}
+
+// Update answer from textarea
 const updateAnswer = (event: Event) => {
   const target = event.target as HTMLTextAreaElement
   answers.value[currentQuestion.value] = target.value.trim()
-  error.value = ''
+  validationError.value = ''
 }
 
-// nextQuestion menerima flag force agar timer bisa memaksa maju walau jawaban kosong
-const nextQuestion = (force = false) => {
+// Submit answers to API
+const submitAnswers = async () => {
+  try {
+    submitting.value = true
+    
+    // Prepare submission data
+    const submissionData = {
+      user_id: 1, // You might want to get this from auth context
+      quiz_id: quizData.value!.id,
+      answers: questions.value.map((question, index) => ({
+        question_id: question.id,
+        user_answer: answers.value[index] || ''
+      }))
+    }
+    
+    // Here you would typically send to your submission endpoint
+    console.log('Submitting answers:', submissionData)
+    
+    // For now, we'll simulate submission and redirect
+    // Replace this with actual API call:
+    // const response = await fetch('http://localhost:3000/quiz/submit', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(submissionData)
+    // })
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Redirect to results page with submission data
+    const encoded = encodeURIComponent(JSON.stringify(submissionData))
+    if (router && typeof router.push === 'function') {
+      router.push({ name: 'result', query: { submission: encoded } }).catch(() => {})
+    } else {
+      // Fallback for development
+      alert('Kuis selesai! Data telah dikirim.')
+      console.log('Final submission:', submissionData)
+    }
+    
+  } catch (err) {
+    console.error('Error submitting answers:', err)
+    validationError.value = 'Gagal mengirim jawaban. Silakan coba lagi.'
+  } finally {
+    submitting.value = false
+  }
+}
+
+// Next question or submit
+const nextQuestion = async (force = false) => {
   const currentAns = (answers.value[currentQuestion.value] || '').trim()
+  
   if (!force && currentAns === '') {
-    error.value = 'Silakan isi jawaban sebelum melanjutkan'
+    validationError.value = 'Silakan isi jawaban sebelum melanjutkan'
     return
   }
 
-  // bersihkan error saat pindah
-  error.value = ''
+  validationError.value = ''
 
-  if (currentQuestion.value < questions.length - 1) {
+  if (currentQuestion.value < questions.value.length - 1) {
     currentQuestion.value++
     resetTimer()
   } else {
-    // contoh: kirim data via query (tergantung kebutuhan)
-    // encode answers supaya aman di URL
-    const encoded = encodeURIComponent(answers.value.join('|'))
-    if (router && typeof router.push === 'function') {
-      router.push({ name: 'result', query: { answers: encoded } }).catch(() => {})
-    } else {
-      // fallback development
-      alert('Kuis selesai! Jawaban: ' + answers.value.join(' | '))
-    }
+    // Submit all answers
+    await submitAnswers()
   }
 }
 
 const prevQuestion = () => {
   if (currentQuestion.value > 0) {
     currentQuestion.value--
-    error.value = ''
+    validationError.value = ''
     resetTimer()
   }
 }
 
 const clearAnswer = () => {
   answers.value[currentQuestion.value] = ''
-  error.value = ''
+  validationError.value = ''
 }
 
-// timer helper
+// Timer functions
 const resetTimer = () => {
   timeLeft.value = 30
 }
 
-// onMounted: mulai interval dan pastikan auto-advance memaksa lanjut bila waktu habis
+// Lifecycle hooks
 onMounted(() => {
+  loadQuiz()
+  
   timer = window.setInterval(() => {
     if (timeLeft.value > 0) {
       timeLeft.value--
     } else {
-      // apabila waktu habis, lanjutkan walau jawaban kosong (force = true)
+      // Auto-advance when time runs out
       nextQuestion(true)
     }
   }, 1000)
 })
 
-// bersihkan interval saat unmount
 onUnmounted(() => {
   if (timer !== null) {
     clearInterval(timer)
