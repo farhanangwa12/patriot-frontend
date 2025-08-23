@@ -21,7 +21,7 @@
 
         <div v-else>
           <p>
-            {{ quizData.description || 'Kuis ini terdiri dari beberapa pertanyaan pilihan ganda. Silakan baca setiap pertanyaan dengan cermat dan pilih jawaban yang paling tepat.' }}
+            {{ quizData.description || `Kuis ini terdiri dari beberapa pertanyaan pilihan ganda. Silakan baca setiap pertanyaan dengan cermat dan pilih jawaban yang paling tepat.` }}
           </p>
 
           <div class="quiz-info" v-if="quizData.total_questions">
@@ -30,7 +30,7 @@
 
           <div class="cta-row">
             <button class="btn-primary" @click="startQuiz" :disabled="loading">Mulai Kuis</button>
-            <button class="btn-ghost" @click="showInfo" aria-haspopup="dialog">Info</button>
+            <button class="btn-ghost" @click="backToQuizManagement" aria-haspopup="dialog">Close</button>
           </div>
         </div>
       </main>
@@ -120,12 +120,14 @@ const startQuiz = () => {
   }
 }
 
-const showInfo = () => {
-  const infoMessage = quizData.value.title
-    ? `${quizData.value.title}\n\nTotal pertanyaan: ${quizData.value.total_questions || 'N/A'}\n\nGood luck!`
-    : 'Kuis ini dibuat untuk latihan singkat. Good luck!'
-
-  alert(infoMessage)
+const backToQuizManagement = () => {
+  
+  if (router && typeof router.push === 'function') {
+    router.push('/quiz-management')
+  } else {
+    // fallback bila belum ada router — masih kelihatan selama development
+    alert('Kuis dimulai! (router belum terpasang)')
+  }
 }
 
 // Fetch data ketika component dimount

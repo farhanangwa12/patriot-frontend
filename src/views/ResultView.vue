@@ -11,7 +11,7 @@
       <div v-else-if="error" class="error-state">
         <h2>Oops! Terjadi Kesalahan</h2>
         <p>{{ error }}</p>
-        <button class="btn btn-primary" @click="goHome">Kembali ke Beranda</button>
+        <button class="btn btn-primary" @click="goQuizManagement">Kembali ke menu Quiz</button>
       </div>
 
       <!-- Success State -->
@@ -117,7 +117,7 @@
         <footer class="card-foot">
           <div class="actions">
             <button class="btn btn-outline" @click="restartQuiz">Ulangi Kuis</button>
-            <button class="btn btn-primary" @click="goHome">Beranda</button>
+            <button class="btn btn-primary" @click="goQuizManagement">Beranda Quiz</button>
           </div>
           <p class="small muted">
             Kuis diselesaikan pada: {{ formatDate(quizResult.completed_at) }}
@@ -256,8 +256,8 @@ const restartQuiz = () => {
   router.push('/intro').catch(() => { })
 }
 
-const goHome = () => {
-  router.push('/').catch(() => { })
+const goQuizManagement = () => {
+  router.push('/quiz-management').catch(() => { })
 }
 
 onMounted(() => {

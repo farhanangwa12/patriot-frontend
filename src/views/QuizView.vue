@@ -165,7 +165,7 @@ const loadQuiz = async () => {
 // Update answer from textarea
 const updateAnswer = (event: Event) => {
   const target = event.target as HTMLTextAreaElement
-  answers.value[currentQuestion.value] = target.value.trim()
+  answers.value[currentQuestion.value] = target.value
   validationError.value = ''
 }
 
@@ -179,11 +179,9 @@ const submitAnswers = async () => {
       quiz_id: quizData.value!.id,
       answers: questions.value.map((question, index) => ({
         question_id: question.id,
-        user_answer: answers.value[index] || ''
+        user_answer: (answers.value[index] || '').trim() // ← trim() saat submit saja
       }))
     }
-
-    console.log('Submitting answers:', submissionData)
 
     const response = await axios.post("http://localhost:3000/quiz/submit", submissionData)
     const resp = response.data
