@@ -46,7 +46,8 @@
             <div class="stat-item correct-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -54,11 +55,12 @@
                 <div class="stat-label">Benar</div>
               </div>
             </div>
-            
+
             <div class="stat-item incorrect-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -66,11 +68,12 @@
                 <div class="stat-label">Salah</div>
               </div>
             </div>
-            
+
             <div class="stat-item accuracy-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -216,20 +219,23 @@ const fetchQuizResult = async () => {
 }
 
 const getMotivationMessage = (percentage: number): string => {
-  if (percentage === 0) {
-    return "Apakah kamu benar-benar menjawab dengan benar? 🤔"
-  } else if (percentage < 25) {
-    return "Wah kamu belum terlalu patriotisme 😅"
-  } else if (percentage === 50) {
-    return "Oke tidak apa-apa yang penting mengetahui beberapa 👍"
+  if (percentage <= 0) {
+    return "Sepertinya kamu perlu belajar lebih giat lagi 🤔"
+  } else if (percentage > 0 && percentage < 25) {
+    return "Awal yang masih kurang, tapi jangan menyerah ya! 💪"
+  } else if (percentage >= 25 && percentage < 50) {
+    return "Lumayan, setidaknya kamu tahu beberapa hal 👍"
+  } else if (percentage >= 50 && percentage < 75) {
+    return "Bagus! Kamu sudah paham cukup banyak 🔥"
   } else if (percentage >= 75 && percentage < 100) {
-    return "Wah hebat banget keren! 🎉"
+    return "Keren banget, hampir sempurna 🎉"
   } else if (percentage === 100) {
-    return "Kamu sangat keren banget, merupakan patriotisme sejati! 🇮🇩✨"
-  } else {
-    return "Terus belajar dan tingkatkan pengetahuan patriotisme! 📚"
+    return "Sempurna! Kamu patriot sejati 🇮🇩✨"
   }
+
+  return "Terus belajar dan tingkatkan pengetahuanmu 📚"
 }
+
 
 const getMotivationClass = (percentage: number): string => {
   if (percentage === 0) return 'motivation-poor'

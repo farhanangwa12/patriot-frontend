@@ -46,7 +46,8 @@
             <div class="stat-item correct-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -54,11 +55,12 @@
                 <div class="stat-label">Benar</div>
               </div>
             </div>
-            
+
             <div class="stat-item incorrect-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -66,11 +68,12 @@
                 <div class="stat-label">Salah</div>
               </div>
             </div>
-            
+
             <div class="stat-item accuracy-stat">
               <div class="stat-icon">
                 <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                  <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="stat-content">
@@ -89,8 +92,8 @@
                   <div class="result-badge" :class="{ ok: answer.is_correct, bad: !answer.is_correct }"
                     :aria-label="answer.is_correct ? 'Benar' : 'Salah'">
                     <svg v-if="answer.is_correct" viewBox="0 0 24 24" class="icon" aria-hidden="true">
-                      <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
+                      <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <svg v-else viewBox="0 0 24 24" class="icon" aria-hidden="true">
                       <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2"
@@ -122,7 +125,10 @@
                   <div class="fact-answer-block">
                     <h4 class="fact-title">
                       <svg viewBox="0 0 24 24" class="fact-icon" aria-hidden="true">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round" />
                       </svg>
                       Fakta & Penjelasan:
                     </h4>
@@ -237,20 +243,23 @@ const fetchQuizResult = async () => {
 }
 
 const getMotivationMessage = (percentage: number): string => {
-  if (percentage === 0) {
-    return "Apakah kamu benar-benar menjawab dengan benar? 🤔"
-  } else if (percentage < 25) {
-    return "Wah kamu belum terlalu patriotisme 😅"
-  } else if (percentage === 50) {
-    return "Oke tidak apa-apa yang penting mengetahui beberapa 👍"
+  if (percentage <= 0) {
+    return "Sepertinya kamu perlu lebih banyak belajar. Semangat! 💪"
+  } else if (percentage > 0 && percentage < 25) {
+    return "Awal yang baik, jangan menyerah ya! 🚀"
+  } else if (percentage >= 25 && percentage < 50) {
+    return "Sudah ada kemajuan, terus tingkatkan! 🔥"
+  } else if (percentage >= 50 && percentage < 75) {
+    return "Bagus! Kamu sudah paham cukup banyak 👍"
   } else if (percentage >= 75 && percentage < 100) {
-    return "Wah hebat banget keren! 🎉"
+    return "Luar biasa! Hampir sempurna 🎉"
   } else if (percentage === 100) {
-    return "Kamu sangat keren banget, merupakan patriotisme sejati! 🇮🇩✨"
-  } else {
-    return "Terus belajar dan tingkatkan pengetahuan patriotisme! 📚"
+    return "Sempurna! Kamu patriot sejati 🇮🇩✨"
   }
+
+  return "Terus belajar dan jangan berhenti berkembang 📚"
 }
+
 
 const getMotivationClass = (percentage: number): string => {
   if (percentage === 0) return 'motivation-poor'
@@ -328,8 +337,13 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-state {
@@ -807,17 +821,17 @@ onMounted(() => {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .question-header {
     flex-direction: column;
     gap: 12px;
     text-align: center;
   }
-  
+
   .question-status {
     justify-content: center;
   }
-  
+
   .question-content {
     padding: 16px;
   }
@@ -827,7 +841,7 @@ onMounted(() => {
   .page-root {
     padding: 16px;
   }
-  
+
   .card {
     padding: 16px;
   }
@@ -851,17 +865,17 @@ onMounted(() => {
   .stat-number {
     font-size: 20px;
   }
-  
+
   .question-number,
   .result-badge {
     width: 40px;
     height: 40px;
   }
-  
+
   .question-number {
     font-size: 14px;
   }
-  
+
   .result-badge .icon {
     width: 18px;
     height: 18px;
