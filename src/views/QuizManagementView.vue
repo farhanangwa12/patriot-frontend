@@ -559,9 +559,9 @@ const closeModal = () => {
 
 .header-content h1 {
     margin: 0;
-    color: #1f2937;
+    color: #062244;
     font-size: 24px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .header-actions {

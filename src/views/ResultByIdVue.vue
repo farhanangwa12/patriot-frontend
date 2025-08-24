@@ -215,7 +215,7 @@ const fetchQuizResult = async () => {
     }
 
     // Update URL sesuai format baru
-    const response = await fetch(`http://localhost:3000/result/get-result/${id}`)
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL_BACKEND}/result/get-result/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
