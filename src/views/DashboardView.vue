@@ -167,10 +167,14 @@ const BASE_URL = import.meta.env.VITE_BASE_URL_BACKEND
 // fetch data dari backend
 const fetchResults = async () => {
     try {
-        const res = await axios.get(`${BASE_URL}/result/get-results`)
+        const res = await axios.get(`${BASE_URL}/result/get-results`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         if (res.data.success) {
             // mapping biar sesuai struktur tabel
-            tableData.value = res.data.data.map(item => ({
+            tableData.value = res.data.data.map((item: any) => ({
                 id: item.id_session,
                 title: item.quiz_title,
                 date: new Date(item.completed_at),

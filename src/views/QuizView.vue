@@ -79,6 +79,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from "axios"
+import { jwtDecode } from 'jwt-decode';
 interface Question {
   id: number
   quiz_id: number
@@ -123,6 +124,11 @@ const submitting = ref<boolean>(false)
 let timer: number | null = null
 
 const progress = computed(() => ((currentQuestion.value + 1) / questions.value.length) * 100)
+
+
+const token = localStorage.getItem('token')
+
+
 
 // Load quiz data from API
 const loadQuiz = async () => {
@@ -172,10 +178,22 @@ const updateAnswer = (event: Event) => {
 // Submit answers to API
 const submitAnswers = async () => {
   try {
+
+    if (!token) {
+      // kalau token kosong → tendang ke /
+      if (router && typeof router.push === 'function') {
+        await router.push('/')
+      } else {
+        window.location.href = '/'
+      }
+      return
+    }
+
+    const userInfo = jwtDecode<{ id: number; name: string; email: string }>(token)
     submitting.value = true
 
     const submissionData = {
-      user_id: 1, // sebaiknya ambil dari auth
+      user_id: userInfo.id, // ✅ ambil dari token
       quiz_id: quizData.value!.id,
       answers: questions.value.map((question, index) => ({
         question_id: question.id,

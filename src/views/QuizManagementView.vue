@@ -380,7 +380,7 @@ const formatDate = (dateString: string) => {
 // Actions
 const startQuiz = async (quiz: Quiz) => {
     try {
-        
+
         // Get full quiz data if needed
         const fullQuiz = await getQuizById(quiz.id)
         localStorage.setItem('selected_quiz', JSON.stringify(fullQuiz.data || fullQuiz))
@@ -501,13 +501,12 @@ const closeModal = () => {
 
 .spinner-sm {
     display: inline-block;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border: 2px solid transparent;
     border-top: 2px solid currentColor;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -517,6 +516,29 @@ const closeModal = () => {
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+/* Fade in and slide up animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -533,7 +555,7 @@ const closeModal = () => {
     margin: 0 0 12px 0;
 }
 
-/* Existing styles remain the same */
+/* Main layout styles */
 .quiz-management-wrap {
     min-height: 100vh;
     background: #f5f7fa;
@@ -569,17 +591,21 @@ const closeModal = () => {
     gap: 12px;
 }
 
+/* Button Styles - Enhanced */
 .btn {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 12px 20px;
+    border-radius: 8px;
     text-decoration: none;
     border: none;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    min-width: fit-content;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn:disabled {
@@ -588,25 +614,30 @@ const closeModal = () => {
 }
 
 .btn-primary {
-    background: #007bff;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: #0056b3;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
+    background: #f9fafb;
+    color: #374151;
+    border: 1px solid #d1d5db;
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background: #545b62;
+    background: #f3f4f6;
+    border-color: #9ca3af;
 }
 
 .btn-icon {
-    margin-right: 8px;
+    margin-right: 0;
 }
 
 .quiz-main {
@@ -758,38 +789,46 @@ const closeModal = () => {
     color: #6b7280;
 }
 
+/* Modal Styles - Enhanced */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.3s ease-out;
 }
 
 .modal-header {
-    padding: 24px 24px 0 24px;
+    padding: 24px 24px 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #f3f4f6;
 }
 
 .modal-header h2 {
     margin: 0;
-    color: #1f2937;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 600;
 }
 
 .close-btn {
@@ -798,10 +837,43 @@ const closeModal = () => {
     font-size: 24px;
     cursor: pointer;
     color: #6b7280;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background-color: #f3f4f6;
+    color: #374151;
 }
 
 .quiz-form {
     padding: 24px;
+    max-height: calc(85vh - 100px);
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for form */
+.quiz-form::-webkit-scrollbar {
+    width: 6px;
+}
+
+.quiz-form::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.quiz-form::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.quiz-form::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .form-group {
@@ -813,71 +885,116 @@ const closeModal = () => {
     margin-bottom: 8px;
     font-weight: 500;
     color: #374151;
+    font-size: 14px;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 12px;
+    padding: 12px 16px;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group input:disabled,
 .form-group textarea:disabled {
     background: #f9fafb;
     color: #6b7280;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.form-preview {
-    background: #f9fafb;
-    padding: 16px;
-    border-radius: 8px;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
+/* Enhanced Preview Styles */
+.form-preview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
 .form-preview h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
+    margin: 0 0 16px 0;
+    font-size: 15px;
+    font-weight: 600;
     color: #374151;
 }
 
 .distribution-preview {
     display: flex;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .dist-item {
     flex: 1;
+    min-width: 120px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.dist-item.fact {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 1px solid #93c5fd;
+}
+
+.dist-item.non-fact {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
 }
 
 .dist-label {
-    display: block;
     font-size: 12px;
+    font-weight: 500;
     color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     margin-bottom: 4px;
 }
 
 .dist-count {
-    display: block;
     font-size: 16px;
     font-weight: 600;
-    color: #1f2937;
+    color: #111827;
 }
 
 .form-actions {
     display: flex;
-    gap: 12px;
     justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #f3f4f6;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -899,11 +1016,42 @@ const closeModal = () => {
 
     .distribution-preview {
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
 
     .form-actions {
-        flex-direction: column;
+        flex-direction: column-reverse;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+        max-height: 90vh;
+    }
+
+    .modal-header {
+        padding: 20px 20px 12px 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .quiz-form {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
 </style>
