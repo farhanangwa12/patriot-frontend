@@ -244,9 +244,9 @@ const loadQuizzes = async () => {
         quizzes.value = response.data.data || response.data
 
         // If no quizzes exist, initialize with default quiz
-        if (quizzes.value.length === 0) {
-            await initializeDefaultQuiz()
-        }
+        // if (quizzes.value.length === 0) {
+        //     await initializeDefaultQuiz()
+        // }
     } catch (err: any) {
         console.error('Failed to load quizzes:', err)
         error.value = err.response?.data?.message || 'Gagal memuat data kuis. Silakan coba lagi.'
@@ -271,20 +271,20 @@ const loadFromLocalStorage = () => {
 }
 
 // Initialize default quiz
-const initializeDefaultQuiz = async () => {
-    const defaultQuiz = {
-        title: 'Quiz Patriotisme',
-        description: 'Ini adalah quiz patriotisme yang dirancang untuk menguji pengetahuan, pemahaman, dan rasa cinta tanah air para peserta. Melalui soal-soal yang telah disusun, kuis ini tidak hanya mengingatkan kita pada peristiwa sejarah penting, tetapi juga membantu merefleksikan nilai-nilai perjuangan dan pengorbanan para pahlawan bangsa.',
-        total_questions: 10,
-        fact_percentage: 50
-    }
+// const initializeDefaultQuiz = async () => {
+//     const defaultQuiz = {
+//         title: 'Quiz Patriotisme',
+//         description: 'Ini adalah quiz patriotisme yang dirancang untuk menguji pengetahuan, pemahaman, dan rasa cinta tanah air para peserta. Melalui soal-soal yang telah disusun, kuis ini tidak hanya mengingatkan kita pada peristiwa sejarah penting, tetapi juga membantu merefleksikan nilai-nilai perjuangan dan pengorbanan para pahlawan bangsa.',
+//         total_questions: 10,
+//         fact_percentage: 50
+//     }
 
-    try {
-        await createQuiz(defaultQuiz)
-    } catch (err) {
-        console.error('Failed to create default quiz:', err)
-    }
-}
+//     try {
+//         await createQuiz(defaultQuiz)
+//     } catch (err) {
+//         console.error('Failed to create default quiz:', err)
+//     }
+// }
 
 // Generate question statuses
 const generateQuestionStatuses = (totalQuestions: number, factPercentage: number) => {
