@@ -150,7 +150,7 @@ const handleLogin = async () => {
 
     // Store token if provided
     if (data.token) {
-      localStorage.setItem('quiz_token', data.token)
+      localStorage.setItem('token', data.token)
     }
 
     // "Remember me" handling

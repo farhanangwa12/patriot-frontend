@@ -27,10 +27,41 @@
             type="email"
             v-model="email"
             autocomplete="email"
-            :disabled="loading"
+            :disabled="loading || otpRequested && otpCountdown > 0"
             :aria-invalid="!!error && !email"
             placeholder="Masukkan email"
           />
+        </div>
+
+        <!-- OTP request + input -->
+        <div class="field">
+          <label for="otp">Kode Verifikasi (OTP)</label>
+          <div class="otp-row">
+            <input
+              id="otp"
+              type="text"
+              inputmode="numeric"
+              v-model="otp"
+              maxlength="8"
+              autocomplete="one-time-code"
+              :disabled="loading"
+              :aria-invalid="!!error && !otp"
+              placeholder="Masukkan kode OTP"
+            />
+            <button
+              type="button"
+              class="otp-btn"
+              @click="requestOtp"
+              :disabled="loading || !email.trim() || (otpCountdown > 0)"
+              :title="otpCountdown > 0 ? `Kirim ulang dalam ${otpCountdown}s` : 'Minta kode verifikasi ke email Anda'"
+            >
+              <span v-if="otpCountdown === 0">Minta kode</span>
+              <span v-else>Ulang dalam {{ otpCountdown }}s</span>
+            </button>
+          </div>
+          <p class="muted small" v-if="otpRequested" role="status" aria-live="polite">
+            Kode telah dikirim ke <strong>{{ email }}</strong>. Masukkan kode yang Anda terima.
+          </p>
         </div>
 
         <div class="field">
@@ -92,7 +123,12 @@
         <p v-if="error" class="error" role="alert" aria-live="assertive">{{ error }}</p>
         <p v-if="success" class="success" role="alert" aria-live="assertive">{{ success }}</p>
 
-        <button class="btn" type="submit" :disabled="loading">
+        <button
+          class="btn"
+          type="submit"
+          :disabled="loading || !email.trim() || !otp.trim()"
+          :aria-disabled="loading || !email.trim() || !otp.trim()"
+        >
           <span v-if="!loading">Daftar</span>
           <span v-else>Loading…</span>
         </button>
@@ -100,7 +136,7 @@
 
       <footer class="card-foot">
         <small class="muted">
-          Sudah punya akun? 
+          Sudah punya akun?
           <router-link to="/" class="link">Masuk di sini</router-link>
         </small>
       </footer>
@@ -109,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -117,11 +153,18 @@ const name = ref<string>('')
 const email = ref<string>('')
 const password = ref<string>('')
 const confirmPassword = ref<string>('')
+const otp = ref<string>('')
+
 const showPassword = ref<boolean>(false)
 const showConfirmPassword = ref<boolean>(false)
 const error = ref<string>('')
 const success = ref<string>('')
 const loading = ref<boolean>(false)
+
+// OTP state
+const otpRequested = ref<boolean>(false)
+const otpCountdown = ref<number>(0)
+let otpInterval: number | undefined = undefined
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
@@ -131,16 +174,71 @@ const toggleConfirmPassword = () => {
   showConfirmPassword.value = !showConfirmPassword.value
 }
 
-// Isi demo data cepat
+// Isi demo data cepat (termasuk OTP demo)
 const fillDemo = () => {
   name.value = 'Rudolf Supratman'
   email.value = 'mantap@mantap.com'
   password.value = '123'
   confirmPassword.value = '123'
+  otp.value = '000000' // demo OTP
   error.value = ''
   success.value = ''
+  otpRequested.value = true
+  otpCountdown.value = 0
 }
 
+// Mulai countdown untuk resend OTP (default 60s)
+const startOtpCountdown = (seconds = 60) => {
+  otpCountdown.value = seconds
+  if (otpInterval) window.clearInterval(otpInterval)
+  otpInterval = window.setInterval(() => {
+    otpCountdown.value -= 1
+    if (otpCountdown.value <= 0) {
+      if (otpInterval) {
+        window.clearInterval(otpInterval)
+        otpInterval = undefined
+      }
+    }
+  }, 1000)
+}
+
+// Request OTP dari backend
+const requestOtp = async () => {
+  error.value = ''
+  success.value = ''
+
+  if (!email.value.trim()) {
+    error.value = 'Masukkan email terlebih dahulu untuk meminta kode.'
+    return
+  }
+
+  loading.value = true
+  try {
+    const resp = await fetch(`${import.meta.env.VITE_BASE_URL_BACKEND}/auth/otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: email.value.trim() })
+    })
+
+    const data = await resp.json()
+    if (!resp.ok) {
+      throw new Error(data?.message || 'Gagal meminta kode OTP')
+    }
+
+    otpRequested.value = true
+    success.value = data?.message || 'Kode OTP berhasil dikirim. Cek email Anda.'
+    // mulai countdown 60 detik untuk mencegah spam
+    startOtpCountdown(60)
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Terjadi kesalahan saat meminta kode OTP.'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Register (sertakan otp)
 const handleRegister = async () => {
   error.value = ''
   success.value = ''
@@ -148,6 +246,11 @@ const handleRegister = async () => {
   // Validation
   if (!name.value.trim() || !email.value.trim() || !password.value || !confirmPassword.value) {
     error.value = 'Silakan isi semua field'
+    return
+  }
+
+  if (!otp.value.trim()) {
+    error.value = 'Masukkan kode OTP yang Anda terima melalui email'
     return
   }
 
@@ -184,7 +287,8 @@ const handleRegister = async () => {
       body: JSON.stringify({
         name: name.value.trim(),
         email: email.value.trim(),
-        password: password.value
+        password: password.value,
+        otp: otp.value.trim()
       })
     })
 
@@ -195,18 +299,22 @@ const handleRegister = async () => {
     }
 
     success.value = 'Registrasi berhasil! Mengalihkan ke halaman login...'
-    
+
     // Redirect to login after 2 seconds
     setTimeout(() => {
       router.push('/').catch(() => {})
     }, 2000)
 
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Terjadi kesalahan saat registrasi. Coba lagi.'
+    error.value = e instanceof Error ? e.message : 'Terjadi kesalahan saat registrasi. Coba lagi.' 
   } finally {
     loading.value = false
   }
 }
+
+onUnmounted(() => {
+  if (otpInterval) window.clearInterval(otpInterval)
+})
 </script>
 
 <style scoped>
@@ -286,6 +394,27 @@ input:focus {
 .pw-toggle:disabled { opacity: 0.6; cursor: not-allowed; }
 .pw-toggle:focus { outline: 3px solid rgba(59,130,246,0.12); outline-offset: 2px; }
 
+/* OTP row */
+.otp-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.otp-row input {
+  flex: 1 1 auto;
+}
+.otp-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(6,34,68,0.06);
+  background: linear-gradient(90deg,#06b6d4,#3b82f6);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+.otp-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
 /* row for demo button */
 .row {
   display: flex;
@@ -309,6 +438,7 @@ input:focus {
 /* Error, success and button */
 .error { color: #dc2626; font-size: 13px; margin: 4px 0; }
 .success { color: #16a34a; font-size: 13px; margin: 4px 0; }
+.small { font-size: 12px; }
 .btn {
   width: 100%;
   padding: 12px;
@@ -331,5 +461,6 @@ input:focus {
 @media (max-width: 480px) {
   .card { padding: 16px; border-radius: 10px; }
   .pw-toggle { padding: 6px; }
+  .otp-btn { padding: 8px 10px; font-size: 12px; }
 }
 </style>

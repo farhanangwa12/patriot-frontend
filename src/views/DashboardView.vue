@@ -25,65 +25,91 @@
                         <router-link to="/quiz-management" class="btn btn-primary">Mulai Kuis</router-link>
                     </div>
 
-                    <!-- Stats Cards -->
-                    <!-- <div class="card stats-card">
-                        <div class="card-icon">📊</div>
-                        <h3>Total Kuis</h3>
-                        <div class="stat-number">{{ stats.totalQuiz }}</div>
-                        <p>Kuis telah diselesaikan</p>
+                </div>
+
+                <!-- Purple Card (baru) -->
+                <div class="card purple-card"
+                    style="margin-top: 5pt; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
+                    <div class="card-icon">✨</div>
+                    <h2>Ringkasan Terbaru</h2>
+                    <p>Lihat ringkasan singkat performa Anda dan riwayat kuis terbaru.</p>
+
+                </div>
+
+                <!-- Table card (full width bawah) -->
+                <div class="card table-card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+                    <div class="table-header">
+                        <h3 class="table-title">📊 Riwayat Kuis Terakhir</h3>
+                        <div class="table-subtitle">Pantau perkembangan hasil kuis Anda</div>
                     </div>
 
-                    <div class="card stats-card">
-                        <div class="card-icon">⭐</div>
-                        <h3>Skor Tertinggi</h3>
-                        <div class="stat-number">{{ stats.highScore }}%</div>
-                        <p>Pencapaian terbaik Anda</p>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th class="th-number">#</th>
+                                        <th class="th-title">Judul Kuis</th>
+                                        <th class="th-date">Tanggal</th>
+                                        <th class="th-stat">Benar</th>
+                                        <th class="th-stat">Salah</th>
+                                        <th class="th-accuracy">Akurasi</th>
+                                        <th class="th-action">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, i) in tableData" :key="row.id" class="table-row">
+                                        <td class="td-number">
+                                            <div class="number-badge">{{ i + 1 }}</div>
+                                        </td>
+                                        <td class="td-title">
+                                            <div class="quiz-info">
+                                                <span class="quiz-title">{{ row.title }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="td-date">
+                                            <div class="date-info">
+                                                <span class="date-text">{{ formatDate(row.date) }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="td-correct">
+                                            <div class="stat-correct">
+                                                <span class="stat-icon">✅</span>
+                                                <span class="stat-number">{{ row.correct }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="td-wrong">
+                                            <div class="stat-wrong">
+                                                <span class="stat-icon">❌</span>
+                                                <span class="stat-number">{{ row.wrong }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="td-accuracy">
+                                            <span class="accuracy-badge" :class="getBadgeClass(row.accuracy)">
+                                                <span class="badge-icon">📈</span>
+                                                {{ row.accuracy }}%
+                                            </span>
+                                        </td>
+                                        <td class="td-action">
+                                            <button @click="viewDetail(row.id)" class="action-button">
+                                                <span class="button-icon">👁️</span>
+                                                Lihat
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="tableData.length === 0" class="empty-state-row">
+                                        <td colspan="7" class="empty-content">
+                                            <div class="empty-illustration">📝</div>
+                                            <div class="empty-title">Belum Ada Riwayat</div>
+                                            <div class="empty-description">Selesaikan kuis pertama Anda untuk melihat
+                                                riwayat di sini!</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-
-                    <div class="card stats-card">
-                        <div class="card-icon">🏆</div>
-                        <h3>Rata-rata</h3>
-                        <div class="stat-number">{{ stats.avgScore }}%</div>
-                        <p>Skor rata-rata</p>
-                    </div> -->
-
-                    <!-- Recent Activity -->
-                    <!-- <div class="card activity-card">
-                        <h3><span class="card-icon">📝</span> Aktivitas Terakhir</h3>
-                        <div class="activity-list">
-                            <div v-if="activities.length === 0" class="empty-state">
-                                <p>Belum ada aktivitas. Mulai kuis pertama Anda!</p>
-                            </div>
-                            <div v-else class="activity-item" v-for="activity in activities" :key="activity.id">
-                                <div class="activity-info">
-                                    <span class="activity-title">{{ activity.title }}</span>
-                                    <span class="activity-date">{{ formatDate(activity.date) }}</span>
-                                </div>
-                                <div class="activity-score" :class="getScoreClass(activity.score)">
-                                    {{ activity.score }}%
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
-                    <!-- Quick Actions -->
-                    <!-- <div class="card actions-card">
-                        <h3><span class="card-icon">⚡</span> Aksi Cepat</h3>
-                        <div class="actions-grid">
-                            <router-link to="/intro" class="action-btn">
-                                <span class="action-icon">🚀</span>
-                                <span>Mulai Kuis Baru</span>
-                            </router-link>
-                            <button @click="viewResults" class="action-btn" :disabled="!hasResults">
-                                <span class="action-icon">📈</span>
-                                <span>Lihat Hasil</span>
-                            </button>
-                            <button @click="resetStats" class="action-btn secondary">
-                                <span class="action-icon">🔄</span>
-                                <span>Reset Statistik</span>
-                            </button>
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </main>
@@ -93,8 +119,19 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 const router = useRouter()
+
+// definisi tipe data dari API
+interface Result {
+    id: number
+    title: string
+    date: Date
+    correct: number
+    wrong: number
+    accuracy: string // pakai string karena backend kirim "0.00"
+}
 
 const userName = ref<string>('User')
 const stats = ref({
@@ -110,12 +147,52 @@ const activities = ref<Array<{
     score: number
 }>>([])
 
+
+const token = localStorage.getItem('token')
+
+if (token) {
+    const userInfo = jwtDecode<{ id: number; name: string; email: string }>(token)
+    userName.value = userInfo.name
+} else {
+    userName.value = "Guest" // fallback kalau token tidak ada
+}
+
+// dummy data untuk tabel (bisa diganti API)
+// reactive data
+const tableData = ref<Result[]>([])
+
+// ambil base URL dari .env
+const BASE_URL = import.meta.env.VITE_BASE_URL_BACKEND
+
+// fetch data dari backend
+const fetchResults = async () => {
+    try {
+        const res = await axios.get(`${BASE_URL}/result/get-results`)
+        if (res.data.success) {
+            // mapping biar sesuai struktur tabel
+            tableData.value = res.data.data.map(item => ({
+                id: item.id_session,
+                title: item.quiz_title,
+                date: new Date(item.completed_at),
+                correct: item.jawaban_benar,
+                wrong: item.jawaban_salah,
+                accuracy: parseFloat(item.akurasi).toFixed(2) // simpan akurasi dari backend
+            }))
+        }
+    } catch (err) {
+        console.error("Gagal ambil data result:", err)
+    }
+}
+
 const hasResults = computed(() => activities.value.length > 0)
 
 onMounted(() => {
-    loadUserData()
-    loadStats()
-    loadActivities()
+    // loadUserData()
+    // loadStats()
+    // loadActivities()
+
+
+    fetchResults();
 })
 
 const loadUserData = () => {
@@ -163,33 +240,40 @@ const formatDate = (date: Date): string => {
     }).format(date)
 }
 
-const getScoreClass = (score: number): string => {
-    if (score >= 80) return 'score-excellent'
-    if (score >= 60) return 'score-good'
-    return 'score-poor'
-}
 
-const viewResults = () => {
-    if (hasResults.value) {
-        router.push('/result')
-    }
-}
-
-const resetStats = () => {
-    if (confirm('Yakin ingin mereset semua statistik? Tindakan ini tidak dapat dibatalkan.')) {
-        stats.value = { totalQuiz: 0, highScore: 0, avgScore: 0 }
-        activities.value = []
-        localStorage.removeItem('quiz_stats')
-        localStorage.removeItem('quiz_activities')
-        localStorage.removeItem('quiz_results')
-    }
-}
 
 const handleLogout = () => {
-    localStorage.removeItem('quiz_token')
+    localStorage.removeItem('token')
     localStorage.removeItem('quiz_demo_email')
     router.push('/').catch(() => { })
 }
+
+
+const calcAccuracy = (row: { correct: number; wrong: number }) => {
+    const total = row.correct + row.wrong
+    if (!total) return 0
+    return Math.round((row.correct / total) * 100)
+}
+
+const getBadgeClass = (accuracy: string) => {
+    const acc = Number(accuracy) // ubah ke number
+    if (acc >= 80) return 'badge-excellent'
+    if (acc >= 60) return 'badge-good'
+    return 'badge-poor'
+}
+
+
+const viewDetail = (id: number) => {
+    const data = {
+        id,
+        url: window.location.href
+    }
+
+    sessionStorage.setItem('sites_data', JSON.stringify(data))
+
+    router.push('/result-quiz') // navigasi menggunakan router
+}
+
 </script>
 
 <style scoped>
@@ -304,155 +388,6 @@ const handleLogout = () => {
     font-size: 16px;
 }
 
-.stats-card {
-    text-align: center;
-}
-
-.stats-card h3 {
-    margin: 0 0 8px;
-    color: #334155;
-    font-size: 16px;
-}
-
-.stat-number {
-    font-size: 2.5em;
-    font-weight: 800;
-    color: #3b82f6;
-    margin: 8px 0;
-}
-
-.stats-card p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.activity-card {
-    grid-column: span 2;
-}
-
-.activity-card h3 {
-    margin: 0 0 20px;
-    color: #334155;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #6b7280;
-}
-
-.activity-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background: rgba(249, 250, 251, 0.8);
-    border-radius: 12px;
-    border: 1px solid rgba(6, 34, 68, 0.04);
-}
-
-.activity-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.activity-title {
-    font-weight: 600;
-    color: #334155;
-}
-
-.activity-date {
-    font-size: 13px;
-    color: #6b7280;
-}
-
-.activity-score {
-    font-weight: 700;
-    font-size: 16px;
-    padding: 4px 12px;
-    border-radius: 20px;
-}
-
-.score-excellent {
-    background: rgba(34, 197, 94, 0.1);
-    color: #16a34a;
-}
-
-.score-good {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
-}
-
-.score-poor {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-}
-
-.actions-card h3 {
-    margin: 0 0 20px;
-    color: #334155;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.actions-grid {
-    display: grid;
-    gap: 12px;
-}
-
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid rgba(6, 34, 68, 0.08);
-    background: rgba(249, 250, 251, 0.8);
-    color: #334155;
-    text-decoration: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 140ms;
-}
-
-.action-btn:hover:not(:disabled) {
-    background: #f3f4f6;
-    transform: translateY(-1px);
-}
-
-.action-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.action-btn.secondary {
-    background: rgba(220, 38, 38, 0.05);
-    border-color: rgba(220, 38, 38, 0.2);
-    color: #dc2626;
-}
-
-.action-btn.secondary:hover:not(:disabled) {
-    background: rgba(220, 38, 38, 0.1);
-}
-
-.action-icon {
-    font-size: 1.2em;
-}
-
 .btn {
     display: inline-flex;
     align-items: center;
@@ -476,15 +411,308 @@ const handleLogout = () => {
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
-/* Responsive */
+/* Purple card */
+.purple-card {
+    grid-column: span 2;
+    text-align: center;
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+    color: white;
+}
+
+.purple-card h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.purple-card p {
+    margin: 0 0 18px;
+    opacity: 0.95;
+}
+
+/* ===== ENHANCED TABLE STYLES ===== */
+.table-card {
+    grid-column: 1 / -1;
+    padding: 32px;
+}
+
+.table-header {
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.table-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-subtitle {
+    color: #64748b;
+    font-size: 15px;
+    margin: 0;
+}
+
+.table-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(2, 6, 23, 0.06);
+    border: 1px solid rgba(6, 34, 68, 0.04);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+/* Header Styles */
+.modern-table thead th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 20px 16px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(6, 34, 68, 0.08);
+    position: relative;
+}
+
+.th-number {
+    width: 60px;
+    text-align: center;
+}
+
+.th-title {
+    width: auto;
+    min-width: 200px;
+}
+
+.th-date {
+    width: 140px;
+}
+
+.th-stat {
+    width: 80px;
+    text-align: center;
+}
+
+.th-accuracy {
+    width: 100px;
+    text-align: center;
+}
+
+.th-action {
+    width: 100px;
+    text-align: center;
+}
+
+/* Row Styles */
+.table-row {
+    transition: all 200ms ease;
+    border-bottom: 1px solid rgba(6, 34, 68, 0.04);
+}
+
+.table-row:hover {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.02), rgba(6, 182, 212, 0.02));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.04);
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.modern-table tbody td {
+    padding: 20px 16px;
+    vertical-align: middle;
+}
+
+/* Cell Content Styles */
+.number-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.quiz-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.quiz-title {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.date-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-text {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stat-correct,
+.stat-wrong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 700;
+}
+
+.stat-correct {
+    color: #16a34a;
+}
+
+.stat-wrong {
+    color: #dc2626;
+}
+
+.stat-icon {
+    font-size: 14px;
+}
+
+.stat-number {
+    font-size: 16px;
+}
+
+/* Accuracy Badge */
+.accuracy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+}
+
+.badge-excellent {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-good {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.08));
+    color: #d97706;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.badge-poor {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.08));
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.badge-icon {
+    font-size: 12px;
+}
+
+/* Action Button */
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 1px solid rgba(6, 34, 68, 0.1);
+    border-radius: 10px;
+    color: #475569;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.action-button:hover {
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    border-color: transparent;
+}
+
+.button-icon {
+    font-size: 12px;
+}
+
+/* Empty State */
+.empty-state-row td {
+    padding: 60px 20px;
+}
+
+.empty-content {
+    text-align: center;
+    color: #64748b;
+}
+
+.empty-illustration {
+    font-size: 3em;
+    margin-bottom: 16px;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.empty-description {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
 
     .welcome-card,
-    .activity-card {
+    .purple-card {
         grid-column: span 1;
+    }
+
+    .table-card {
+        padding: 20px;
+    }
+
+    .table-title {
+        font-size: 20px;
+    }
+
+    .modern-table thead th,
+    .modern-table tbody td {
+        padding: 16px 12px;
     }
 
     .header-content {
@@ -516,8 +744,12 @@ const handleLogout = () => {
         font-size: 24px;
     }
 
-    .stat-number {
-        font-size: 2em;
+    .table-card {
+        padding: 16px;
+    }
+
+    .modern-table {
+        min-width: 600px;
     }
 }
 </style>
