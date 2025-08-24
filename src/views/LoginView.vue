@@ -90,7 +90,7 @@ const togglePassword = () => {
 
 // Isi demo credentials cepat
 const fillDemo = () => {
-  email.value = 'mantap@mantap.com'
+  email.value = 'test@test.com'
   password.value = '123'
   error.value = ''
 }
