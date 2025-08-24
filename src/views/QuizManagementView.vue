@@ -112,6 +112,14 @@
                             rows="4" required :disabled="saving"></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="topic">Topik</label>
+                        <input type="text" id="topic" v-model="formData.topic"
+                            placeholder="Masukkan topik kuis (misal: Patriotisme, Demokrasi, dll)" required
+                            :disabled="saving" />
+                    </div>
+
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="total-questions">Total Soal</label>
@@ -170,7 +178,8 @@ interface Quiz {
     title: string
     description: string
     question_statuses: { status: string }[]
-    total_questions: number
+    total_questions: number,
+    topic: string,
     created_at: string
     updated_at: string
 }
@@ -187,9 +196,11 @@ const error = ref<string | null>(null)
 const formData = ref({
     title: '',
     description: '',
+    topic: '',        
     total_questions: 10,
     fact_percentage: 50
 })
+
 
 // Axios instance with default config
 const api = axios.create({
@@ -320,6 +331,7 @@ const createQuiz = async (quizData: any) => {
     const payload = {
         title: quizData.title,
         description: quizData.description,
+        topic: quizData.topic,  
         total_questions: quizData.total_questions,
         question_statuses: questionStatuses
     }
@@ -327,6 +339,7 @@ const createQuiz = async (quizData: any) => {
     const response = await api.post('/create-quizez', payload)
     return response.data
 }
+
 
 // Update quiz
 const updateQuiz = async (id: number, quizData: any) => {
@@ -338,6 +351,7 @@ const updateQuiz = async (id: number, quizData: any) => {
     const payload = {
         title: quizData.title,
         description: quizData.description,
+        topic: quizData.topic,   // ➕ kirim topic
         total_questions: quizData.total_questions,
         question_statuses: questionStatuses
     }
@@ -345,6 +359,7 @@ const updateQuiz = async (id: number, quizData: any) => {
     const response = await api.put(`/update-quizez/${id}`, { ...payload })
     return response.data
 }
+
 
 // Get quiz by ID
 const getQuizById = async (id: number) => {
@@ -398,10 +413,12 @@ const editQuiz = (quiz: Quiz) => {
     formData.value = {
         title: quiz.title,
         description: quiz.description,
+        topic: quiz.topic || '',   // ➕ load topic
         total_questions: quiz.total_questions,
         fact_percentage: Math.round((getFactCount(quiz) / quiz.total_questions) * 100) || 50
     }
 }
+
 
 const deleteQuiz = async (id: number) => {
     if (!confirm('Yakin ingin menghapus paket kuis ini?')) {
@@ -469,10 +486,12 @@ const closeModal = () => {
     formData.value = {
         title: '',
         description: '',
+        topic: '',          // reset topic juga
         total_questions: 10,
         fact_percentage: 50
     }
 }
+
 </script>
 
 <style scoped>
