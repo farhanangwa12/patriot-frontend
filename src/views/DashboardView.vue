@@ -195,41 +195,41 @@ onMounted(() => {
     fetchResults();
 })
 
-const loadUserData = () => {
-    // Try to get user info from localStorage or API
-    const savedEmail = localStorage.getItem('quiz_demo_email')
-    if (savedEmail) {
-        userName.value = savedEmail.split('@')[0]
-    }
-}
+// const loadUserData = () => {
+//     // Try to get user info from localStorage or API
+//     const savedEmail = localStorage.getItem('quiz_demo_email')
+//     if (savedEmail) {
+//         userName.value = savedEmail.split('@')[0]
+//     }
+// }
 
-const loadStats = () => {
-    // Load stats from localStorage (in real app, this would be from API)
-    const savedStats = localStorage.getItem('quiz_stats')
-    if (savedStats) {
-        try {
-            stats.value = JSON.parse(savedStats)
-        } catch (e) {
-            console.error('Failed to load stats:', e)
-        }
-    }
-}
+// const loadStats = () => {
+//     // Load stats from localStorage (in real app, this would be from API)
+//     const savedStats = localStorage.getItem('quiz_stats')
+//     if (savedStats) {
+//         try {
+//             stats.value = JSON.parse(savedStats)
+//         } catch (e) {
+//             console.error('Failed to load stats:', e)
+//         }
+//     }
+// }
 
-const loadActivities = () => {
-    // Load activities from localStorage (in real app, this would be from API)
-    const savedActivities = localStorage.getItem('quiz_activities')
-    if (savedActivities) {
-        try {
-            const parsed = JSON.parse(savedActivities)
-            activities.value = parsed.map((activity: any) => ({
-                ...activity,
-                date: new Date(activity.date)
-            }))
-        } catch (e) {
-            console.error('Failed to load activities:', e)
-        }
-    }
-}
+// const loadActivities = () => {
+//     // Load activities from localStorage (in real app, this would be from API)
+//     const savedActivities = localStorage.getItem('quiz_activities')
+//     if (savedActivities) {
+//         try {
+//             const parsed = JSON.parse(savedActivities)
+//             activities.value = parsed.map((activity: any) => ({
+//                 ...activity,
+//                 date: new Date(activity.date)
+//             }))
+//         } catch (e) {
+//             console.error('Failed to load activities:', e)
+//         }
+//     }
+// }
 
 const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat('id-ID', {
@@ -249,11 +249,11 @@ const handleLogout = () => {
 }
 
 
-const calcAccuracy = (row: { correct: number; wrong: number }) => {
-    const total = row.correct + row.wrong
-    if (!total) return 0
-    return Math.round((row.correct / total) * 100)
-}
+// const calcAccuracy = (row: { correct: number; wrong: number }) => {
+//     const total = row.correct + row.wrong
+//     if (!total) return 0
+//     return Math.round((row.correct / total) * 100)
+// }
 
 const getBadgeClass = (accuracy: string) => {
     const acc = Number(accuracy) // ubah ke number

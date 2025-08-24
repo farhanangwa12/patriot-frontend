@@ -136,7 +136,7 @@
 
         <footer class="card-foot">
           <div class="actions">
-            <button class="btn btn-outline" @click="restartQuiz">Ulangi Kuis</button>
+            <button class="btn btn-outline" @click="goDashboard">Dashboard</button>
             <button class="btn btn-primary" @click="goQuizManagement">Beranda Quiz</button>
           </div>
           <p class="small muted">
@@ -273,8 +273,8 @@ const formatDate = (dateString: string): string => {
   })
 }
 
-const restartQuiz = () => {
-  router.push('/intro').catch(() => { })
+const goDashboard = () => {
+  router.push('/dashboard').catch(() => { })
 }
 
 const goQuizManagement = () => {
